@@ -2,10 +2,11 @@
 window.addEventListener('DOMContentLoaded', function() {
     'use strict';
     // -------- Создаем рабочие табы --------
-
+   
     let tab = document.querySelectorAll('.info-header-tab'), // каждый заголовок табов
         info = document.querySelector('.info-header'), // нужен родитель для всех заголовков табов
-        tabContent = document.querySelectorAll('.info-tabcontent'); // нужен родитель для всех контейнеров табов 
+        tabContent = document.querySelectorAll('.info-tabcontent');
+     // нужен родитель для всех контейнеров табов 
     function hideTabContent(a) {
         for (let i = a; i < tabContent.length; i++) {
             tabContent[i].classList.remove('show'); // удаляем класс show (see in css: .content .info .show)
@@ -133,5 +134,65 @@ window.addEventListener('DOMContentLoaded', function() {
     //     // document.body.style.overflow = ''; // отмена запрета прокрутки
     // });
 
+
+    //-----SLIDER-------
+    let sliderItem = document.querySelectorAll('.slider-item fade'),
+        sliderDots = document.querySelectorAll('.slider-dots'),
+        wrap = document.querySelector('.wrap');
+    
+    function slide(c) {
+        for (let i = c; i < sliderItem.length; i++) {
+            sliderItem[i].classList.remove('next');
+            sliderItem[i].classList.add('prev');
+        }
+    }
+    slide(1);
+
+
+    // --------FORM----------
+
+    let message = {
+        loading: 'Загрузка',
+        success: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'Что-то пошло не так...'
+    };
+
+    let form = document.querySelector('.main-form'),
+        input = form.getElementsByTagName('input'),
+        statusMessage = document.createElement('div');
+
+        statusMessage.classList.add('status');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // отмена стандартного поведения браузера - в данном случае при отравке формы сраница не перезагружается
+        form.appendChild(statusMessage);
+
+        let request = new XMLHttpRequest();
+        request.open('POST', 'server.php');
+        request.setRequestHeader ('Content-Type', 'application/json; charset=utf-8'); // настройки заголовков http запросов
+
+        let formData = new FormData(form);
+
+        let obj = {};
+        formData.forEach(function(value, key) {
+            obj[key] = value;
+        });// превращаем в json формат
+        let json = JSON.stringify(obj);
+
+        request.send(json);
+
+        request.addEventListener('readystatechange', function() {
+            if (request.readyState < 4) {
+                statusMessage.innerHTML = message.loading; // если грузится, сюда можно поместить значок загрузки
+            } else if (request.readyState === 4 && request.status == 200) {
+                statusMessage.innerHTML = message.success;
+            } else {statusMessage.innerHTML = message.failure;
+            }
+        });
+
+        for (let i = 0; i < input.length; i++) {
+            input[i].value = '';
+        }// очищаем инпуты
+    });
 }); // Выполнение скрипта начнется только тогда, когда прогрузятся основные элементы дерева DOM
 
